@@ -26,9 +26,11 @@ public class BibleScholar {
     public String[] resolve() {
 
 
+        // 获取逆序的Map数据
         Map<String, Integer> oneMap = bs.getOneNumMap(wordsTable);
         Map<String, Integer> wordMap = bs.sortByValue(wordsTable);
 
+        // 格式化数据
         String[] wordArr = new String[24];
         String curStr;
         Iterator<Map.Entry<String, Integer>> entries = wordMap.entrySet().iterator();
@@ -37,7 +39,6 @@ public class BibleScholar {
 
             Map.Entry<String, Integer> entry = entries.next();
             curStr = entry.getKey() + ":" + entry.getValue();
-//            System.out.println(curStr);
             wordArr[i] = curStr;
             i++;
             if (i > 12) break;
@@ -48,17 +49,29 @@ public class BibleScholar {
 
             Map.Entry<String, Integer> entry = entries1.next();
             curStr = entry.getKey() + ":" + entry.getValue();
-//            System.out.println(curStr);
             wordArr[i] = curStr;
             i++;
             if (i > 23) break;
         }
 
-        bs.showArray(wordArr);
-        return null;
+        return wordArr;
     }
 
 
+    public static void main(String[] args) {
+        // 读取文件内容
+        bs.getStopWordsData();
+        bs.getMapDataFromkjvFile();
+
+        // 生成结果数组
+        String[] result = bs.resolve();
+
+        // 打印数组
+        bs.showArray(result);
+    }
+
+
+    // 针对value低频的12个排序
     private <String extends Comparable<? super String>, Integer > Map<String, Integer> getOneNumMap(Map<String, Integer> map) {
         Map<String, Integer> result = new LinkedHashMap<>();
         Map<String, Integer> oneMap = new LinkedHashMap<>();
@@ -76,34 +89,26 @@ public class BibleScholar {
                 .sorted(Map.Entry.<String, Integer>comparingByKey()
                         .reversed()).forEachOrdered(
                                 e -> result.put(e.getKey(), e.getValue()));
-//        System.out.println(result);
         return result;
 
     }
 
+
+    // 对整体的数据进行逆序排序
     private <String, Integer extends Comparable<? super Integer>> Map<String, Integer> sortByValue(Map<String, Integer> map) {
         Map<String, Integer> result = new LinkedHashMap<>();
 
         map.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue()
                         .reversed()).forEachOrdered(e -> result.put(e.getKey(), e.getValue()));
-//        System.out.println(result);
         return result;
 
     }
 
 
-    public static void main(String[] args) {
-        stopWordsHash = getStopWordsData();
 
-        getNumberFromkjv();
-
-        bs.resolve();
-    }
-
-
-
-    private static void getNumberFromkjv() {
+    // 读取kjv文件并保存数据在hashmap中
+    private void getMapDataFromkjvFile() {
         java.lang.String kjvFilePath = BibleScholar.class.getClassLoader().getResource("kjv.txt").getPath();
         File file = new File(kjvFilePath);
 
@@ -127,9 +132,6 @@ public class BibleScholar {
                             curHashValue = wordsTable.get(findStr);
                             wordsTable.replace(findStr, ++curHashValue);
                         }
-
-
-//                        System.out.println("cureentkey===" + findStr + "  value===" + curHashValue);
                     }
                 }
 
@@ -144,34 +146,33 @@ public class BibleScholar {
 
     }
 
-    private static HashMap<String, Integer> getStopWordsData() {
+
+    // 从文件获取过滤词的hashmap数据
+    private void getStopWordsData() {
         java.lang.String stopWordsFilePath = BibleScholar.class.getClassLoader().getResource("stopwords.txt").getPath();
         File file = new File(stopWordsFilePath);
 
-        HashMap<String, Integer> map = new HashMap<>();
+        stopWordsHash = new HashMap<>();
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
 
             java.lang.String st;
             while ((st = br.readLine()) != null) {
-                map.put(st, 0);
+                stopWordsHash.put(st, 0);
             }
-            return map;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return map;
         } catch (IOException e) {
             e.printStackTrace();
-            return map;
         }
     }
-
 
     private void showArray(String[] arr) {
         for (String st :arr) {
             System.out.println(st);
         }
     }
+
 
 }
